@@ -1,2 +1,2 @@
 ### TicketNews / Slack Integration
-Checks TicketNews' RSS feed on a regular interval for new entries and Slack bot posts in private chat
+Simple script that checks TicketNews' RSS feed on a regular interval for new entries and bot posts in Slack channel
