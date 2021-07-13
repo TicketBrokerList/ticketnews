@@ -43,6 +43,9 @@ def main():
         for post in new_posts:
             slack.post(post)
 
+    print(f"{len(new_posts)} new posts found:\n{new_posts}")
+
 
 if __name__ == "__main__":
+    print("Starting TicketNews.com script...")
     main()
