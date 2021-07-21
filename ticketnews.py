@@ -11,10 +11,12 @@ class SlackMessage:
         self.mods_webhook = config("MODS_SLACK_WEBHOOK")
 
     def post(self, message):
+        title, link = message.values()
+        link = link.split("?utm_source")[0]
         slack_msg = {
             "blocks": [
                 {"type": "divider"},
-                {"type": "section", "text": {"type": "mrkdwn", "text": f"{message}"}},
+                {"type": "section", "text": {"type": "mrkdwn", "text": f"{title}\n{link}"}},
             ],
         }
         requests.post(self.mods_webhook, data=json.dumps(slack_msg))
@@ -28,20 +30,25 @@ def main():
 
     # parse rss
     response = feedparser.parse("https://www.ticketnews.com/feed/")
-
     entries = response["entries"]
-    links = [entry["links"][0]["href"] for entry in entries]
+
     new_posts = []
-    for link in links:
+    for entry in entries:
+        title = entry['title']
+        link = entry["link"]
         if link != latest_rss_link:
-            new_posts.append(link)
+            post_obj = {
+                "title": title,
+                "link": link
+            }
+            new_posts.append(post_obj)
         else:
             break
 
     # check if post was already sent
     if len(new_posts):
         with open(filename, "w") as f:
-            f.write(new_posts[0])
+            f.write(new_posts[0]['link'])
 
         slack = SlackMessage()
         for post in new_posts:
