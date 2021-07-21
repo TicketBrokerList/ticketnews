@@ -1,5 +1,4 @@
 import json
-import os
 from datetime import datetime
 
 import feedparser
@@ -22,10 +21,12 @@ class SlackMessage:
 
 
 def main():
-    filename = os.path.abspath("last_ticketsnews_rss.txt")
+    # check latest post sent to Slack
+    filename = "/root/ticketnews/last_ticketnews_rss.txt"
     with open(filename, "r") as f:
         latest_rss_link = f.read()
 
+    # parse rss
     response = feedparser.parse("https://www.ticketnews.com/feed/")
 
     entries = response["entries"]
@@ -37,6 +38,7 @@ def main():
         else:
             break
 
+    # check if post was already sent
     if len(new_posts):
         with open(filename, "w") as f:
             f.write(new_posts[0])
@@ -45,13 +47,9 @@ def main():
         for post in new_posts:
             slack.post(post)
 
-    msg = f"[{datetime.utcnow()}] {len(new_posts)} new posts found: {new_posts}\n"
-    log_filename = os.path.abspath("cron.log")
-    with open(log_filename, "a") as f:
-        f.write(msg)
-    print(msg)
+    # cronjob logs
+    print(f"[{datetime.utcnow()}] {len(new_posts)} new posts found: {new_posts}")
 
 
 if __name__ == "__main__":
-    print("Starting TicketNews.com script...")
     main()
