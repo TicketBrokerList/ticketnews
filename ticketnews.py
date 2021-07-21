@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 
 import feedparser
 import requests
@@ -44,7 +45,11 @@ def main():
         for post in new_posts:
             slack.post(post)
 
-    print(f"{len(new_posts)} new posts found:\n{new_posts}")
+    msg = f"[{datetime.utcnow()}] {len(new_posts)} new posts found: {new_posts}\n"
+    log_filename = os.path.abspath("cron.log")
+    with open(log_filename, "a") as f:
+        f.write(msg)
+    print(msg)
 
 
 if __name__ == "__main__":
