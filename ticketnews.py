@@ -1,4 +1,5 @@
 import json
+import os
 
 import feedparser
 import requests
@@ -20,7 +21,7 @@ class SlackMessage:
 
 
 def main():
-    filename = "last_ticketsnews_rss.txt"
+    filename = os.path.abspath("last_ticketsnews_rss.txt")
     with open(filename, "r") as f:
         latest_rss_link = f.read()
 
