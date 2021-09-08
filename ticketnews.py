@@ -8,7 +8,7 @@ from decouple import config
 
 class SlackMessage:
     def __init__(self):
-        self.mods_webhook = config("MODS_SLACK_WEBHOOK")
+        self.mods_webhook = config("SLACK_CHANNEL_WEBHOOK")
 
     def post(self, message):
         title, link = message.values()
