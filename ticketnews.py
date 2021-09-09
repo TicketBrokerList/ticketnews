@@ -34,13 +34,10 @@ def main():
 
     new_posts = []
     for entry in entries:
-        title = entry['title']
+        title = entry["title"]
         link = entry["link"]
         if link != latest_rss_link:
-            post_obj = {
-                "title": title,
-                "link": link
-            }
+            post_obj = {"title": title, "link": link}
             new_posts.append(post_obj)
         else:
             break
@@ -48,7 +45,7 @@ def main():
     # check if post was already sent
     if len(new_posts):
         with open(filename, "w") as f:
-            f.write(new_posts[0]['link'])
+            f.write(new_posts[0]["link"])
 
         slack = SlackMessage()
         for post in new_posts:
