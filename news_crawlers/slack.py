@@ -7,7 +7,7 @@ from decouple import config
 
 class SlackMessage:
     def __init__(self) -> None:
-        self.WEBHOOK_URI = config("SLACK_CHANNEL_WEBHOOK")
+        self.WEBHOOK_URI = config("GENERAL_CHANNEL_WEBHOOK")
 
     def post(self, message: Union[str, dict], site: Union[str, None] = None) -> None:
         if site == "TicketNews":
