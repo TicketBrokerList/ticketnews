@@ -7,7 +7,7 @@ from decouple import config
 
 class SlackMessage:
     def __init__(self) -> None:
-        self.WEBHOOK_URI = config("GENERAL_CHANNEL_WEBHOOK")
+        self.WEBHOOK_URI = config("GENERAL_CHANNEL_WEBHOOK", default="")
 
     def post(self, message: Union[str, dict], site: Union[str, None] = None) -> None:
         if site == "TicketNews":
@@ -31,5 +31,7 @@ class SlackMessage:
                     {"type": "section", "text": {"type": "mrkdwn", "text": f"{formatted_releases}"}},
                 ],
             }
-        if site:
-            requests.post(self.WEBHOOK_URI, data=json.dumps(slack_msg))
+        else:
+            raise ValueError("No site provided!")
+
+        requests.post(self.WEBHOOK_URI, data=json.dumps(slack_msg))

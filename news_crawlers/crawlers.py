@@ -45,7 +45,7 @@ class TicketNewsCrawler(BaseCrawler):
         articles = self._get_articles()
         new_posts = self._filter_new_posts(articles)
         print(f"{len(new_posts)} {self.site} articles found.")
-        self._notify(new_posts, site=self.site)
+        self.notify(new_posts, site=self.site)
 
 
 class MetaCriticCrawler(BaseCrawler):
@@ -103,4 +103,4 @@ class MetaCriticCrawler(BaseCrawler):
         articles = self._parse_articles(body)
         new_posts = self._filter_new_posts(articles)
         print(f"{len(new_posts)} {self.site} articles found.")
-        self._notify(new_posts, site=self.site)
+        self.notify(new_posts, site=self.site)
