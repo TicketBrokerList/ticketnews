@@ -4,7 +4,7 @@ import json
 
 class DiscordHandler:
     def __init__(self) -> None:
-        self.WEBHOOK_URI = "https://discord.com/api/webhooks/1113638203216363591/FWeqeoy47Hwyxw0xYge63pTgPPt7PZKEEQs9-ObjyKKNQP7z8RVBdWlyT8oRvl3Bdjf5"
+        self.WEBHOOK_URI = "https://discord.com/api/webhooks/1116830429538955425/aa6tkPRgzsl_Sl6h0NAt0tZwDbSMRqFEnUgOu-Si7GqxGoQWbgOWOwS3BfPfxlZBrWAq"
 
     def post(self, message, site=None) -> None:
         if site == "TicketNews":
