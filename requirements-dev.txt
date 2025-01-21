@@ -1,0 +1,4 @@
+pyupgrade==3.19.1
+mypy-extensions==0.4.3
+isort>=5.12.0
+black>=23.0.0

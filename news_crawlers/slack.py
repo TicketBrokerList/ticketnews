@@ -1,15 +1,18 @@
 import json
-from typing import Union
+import os
 
 import requests
-from decouple import config
+from dotenv import load_dotenv
 
 
 class SlackMessage:
     def __init__(self) -> None:
-        self.WEBHOOK_URI = config("GENERAL_CHANNEL_WEBHOOK", default="")
+        load_dotenv()
+        self.WEBHOOK_URI = os.environ.get("SLACK_CHANNEL_WEBHOOK")
+        if not self.WEBHOOK_URI:
+            raise ValueError("SLACK_CHANNEL_WEBHOOK environment variable is not set")
 
-    def post(self, message: Union[str, dict], site: Union[str, None] = None) -> None:
+    def post(self, message: str | dict, site: str | None = None) -> None:
         if site == "TicketNews":
             title, link = message.values()
             link = link.split("?utm_source")[0]
@@ -33,5 +36,4 @@ class SlackMessage:
             }
         else:
             raise ValueError("No site provided!")
-
         requests.post(self.WEBHOOK_URI, data=json.dumps(slack_msg))

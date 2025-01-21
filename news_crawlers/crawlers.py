@@ -1,51 +1,12 @@
 from collections import defaultdict
 from datetime import datetime
-from typing import List, Union
 
 import dateparser
-import feedparser
 import requests
 from bs4 import BeautifulSoup
 from fake_headers import Headers
 
 from .base import BaseCrawler
-from .db import Post, Session
-
-
-class TicketNewsCrawler(BaseCrawler):
-    site = "TicketNews"
-    url = "https://www.ticketnews.com/feed/"
-
-    def _get_articles(self) -> List[dict]:
-        response = feedparser.parse(self.url)
-        return response["entries"]
-
-    def _filter_new_posts(self, entries: str) -> List[str]:
-        with Session() as session:
-            past_posts = [r for r, in session.query(Post.url).all()]
-
-            new_posts = []
-            for entry in entries:
-                title = entry["title"]
-                url = entry["link"].split("?")[0]
-                if url not in past_posts:
-                    post_obj = {"title": title, "link": url}
-                    new_posts.append(post_obj)
-
-                    # record new post
-                    post = Post(site=self.site, url=url)
-                    session.add(post)
-                    session.commit()
-                else:
-                    break
-
-            return new_posts[:3]
-
-    def crawl(self) -> None:
-        articles = self._get_articles()
-        new_posts = self._filter_new_posts(articles)
-        print(f"{len(new_posts)} {self.site} articles found.")
-        self.notify(new_posts, site=self.site)
 
 
 class MetaCriticCrawler(BaseCrawler):
@@ -59,17 +20,16 @@ class MetaCriticCrawler(BaseCrawler):
         )
         return header.generate()
 
-    def _get_articles(self) -> List[dict]:
+    def _get_articles(self) -> list[dict]:
         response = requests.get(self.url, headers=self._get_headers())
-        if response.status_code != 200:
-            raise ValueError("Something went wrong!")
+        response.raise_for_status()
         return response.text
 
     @staticmethod
-    def _clean_text(text: Union[str, None]) -> str:
+    def _clean_text(text: str | None) -> str:
         return text.strip() if text else ""
 
-    def _parse_articles(self, html_body: str) -> List[dict]:
+    def _parse_articles(self, html_body: str) -> list[dict]:
         soup = BeautifulSoup(html_body, "lxml")
         table = soup.find("table", {"class": "musicTable"})
         rows = table.find_all("tr")
@@ -86,15 +46,12 @@ class MetaCriticCrawler(BaseCrawler):
                 album_releases[release_date].append(data)
         return album_releases
 
-    def _filter_new_posts(self, entries: str) -> List[str]:
+    def _filter_new_posts(self, entries: str) -> list[str]:
         dates = sorted(entries.keys())
-        d = datetime.utcnow()
         new_posts = []
         for date in dates:
-            time_to_release = (date - datetime(d.year, d.month, d.day)).days
-            if time_to_release == 0 or time_to_release == 7:
-                post = {date: entries[date]}
-                new_posts.append(post)
+            post = {date: entries[date]}
+            new_posts.append(post)
 
         return new_posts[:3]
 
