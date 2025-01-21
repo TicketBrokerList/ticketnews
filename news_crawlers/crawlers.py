@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
+from typing import Dict, List
 
 import dateparser
 import requests
@@ -7,11 +8,16 @@ from bs4 import BeautifulSoup
 from fake_headers import Headers
 
 from .base import BaseCrawler
+from .db import Post, Session
 
 
 class MetaCriticCrawler(BaseCrawler):
     site = "MetaCritic"
     url = "https://www.metacritic.com/browse/albums/release-date/coming-soon"
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.db_session = Session()
 
     @staticmethod
     def _get_headers():
@@ -46,14 +52,27 @@ class MetaCriticCrawler(BaseCrawler):
                 album_releases[release_date].append(data)
         return album_releases
 
-    def _filter_new_posts(self, entries: str) -> list[str]:
+    def _is_date_posted(self, check_date: datetime) -> bool:
+        """Check if this date has been posted before"""
+        return bool(self.db_session.query(Post).filter(Post.album_release_date == check_date).first())
+
+    def _save_date(self, post_date: datetime) -> None:
+        """Save the date record to database"""
+        post = Post(album_release_date=post_date)
+        self.db_session.add(post)
+        self.db_session.commit()
+
+    def _filter_new_posts(self, entries: Dict) -> List[Dict]:
         dates = sorted(entries.keys())
         new_posts = []
-        for date in dates:
-            post = {date: entries[date]}
-            new_posts.append(post)
 
-        return new_posts[:3]
+        for date in dates[:3]:  # Look at latest 3 dates
+            if not self._is_date_posted(date):  # Check date before appending
+                post = {date: entries[date]}
+                new_posts.append(post)
+                self._save_date(date)  # Save the date right after we decide to use it
+
+        return new_posts
 
     def crawl(self) -> None:
         body = self._get_articles()
